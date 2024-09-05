@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let enterButton = document.getElementById("enter");
+let askUserButton = document.getElementById("askUser");
 let input = document.getElementById("userInput");
 let ul = document.querySelector("ul");
 let item = document.getElementsByTagName("li");
@@ -35,11 +36,15 @@ function listLength() {
 }
 
 function createListElement() {
-    let li = document.createElement("li"); // creates an element "li"
-    li.appendChild(document.createTextNode(input.value)); //makes text from input field the li text
-    ul.appendChild(li); //adds li to ul
-    input.value = ""; //Reset text input field
+    if (taskExists(input.value)) {
+        alert("This task already exists!");
+        return;
+    }
 
+    let li = document.createElement("li");
+    li.appendChild(document.createTextNode(input.value));
+    ul.appendChild(li);
+    input.value = "";
 
     //START STRIKETHROUGH
     // because it's in the function, it only adds it for new items
@@ -54,26 +59,53 @@ function createListElement() {
     // START ADD DELETE BUTTON
     let dBtn = document.createElement("button");
     dBtn.appendChild(document.createTextNode("X"));
+    dBtn.addEventListener("click", deleteListItem);
     li.appendChild(dBtn);
 
 }
 
-
 function addListAfterClick() {
-    if (inputLength() > 0) { //makes sure that an empty input field doesn't create a li
+    if (inputLength() > 0) {
         createListElement();
     }
 }
 
 function addListAfterKeypress(event) {
-    if (inputLength() > 0 && event.which === 13) { //this now looks to see if you hit "enter"/"return"
-        //the 13 is the enter key's keycode, this could also be display by event.keyCode === 13
+    if (inputLength() > 0 && event.which === 13) {
         createListElement();
     }
 }
 
+function taskExists(task) {
+    for (let i = 0; i < item.length; i++) {
+        if (item[i].textContent.slice(0, -1).toLowerCase() === task.toLowerCase()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function deleteListItem(e) {
+    e.target.parentElement.remove();
+}
+
+function askUser() {
+    let task;
+    do {
+        task = prompt("Enter a new task (or click Cancel to stop):");
+        if (task === null) break;
+        if (task.trim() === "") {
+            alert("Task cannot be empty!");
+        } else if (taskExists(task)) {
+            alert("This task already exists!");
+        } else {
+            input.value = task;
+            createListElement();
+        }
+    } while (true);
+}
 
 enterButton.addEventListener("click", addListAfterClick);
-
 input.addEventListener("keypress", addListAfterKeypress);
+askUserButton.addEventListener("click", askUser);
 
